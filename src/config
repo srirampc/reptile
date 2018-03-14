@@ -1,0 +1,71 @@
+# input short read fasta file
+InFaFile		input/sr.fa
+
+# At current version, QFlag has to be 1 (i.e. quality score information is required)
+QFlag			1
+
+# input quality score accompanied with short read fasta file
+# currently, we require separate fasta format read file and quality file
+# prepare these files using script fastaq-converter.pl in the script folder
+IQFile			input/sr.q
+
+# output file list all errors for each kmer (see readme file for the output format)
+OErrFile		output/reptile-output
+
+# If the dataset is too large to fit in memory, read in batches.
+# This parameter specifies the number of reads to be loaded in memory each time
+# default value is 1 million 
+BatchSize		1000000	
+
+# kmer length 
+KmerLen			12
+
+# Maximum Hamming Distance per Kmer
+hd_max			1
+
+# A tile length = KmerLen + Step 
+Step 			12
+
+# This controls the run-time and memory,  set to 4^c (1<= c <= 4)
+# to reduce the run time set c to be a smaller value, but memory usage will increase 
+# to save memory, increase c value
+ExpectSearch	16
+
+#### The following parameters need to be tuned to specific dataset ######## 
+
+# T_ratio: tile_cardinality/maximum_alternative_tile_cardinality
+T_ratio			0.5
+
+# deterimine if a base > QThreshold is considered as of high quality (ASCII value) -- modify this value
+# according to the input data
+QThreshold		73
+
+# maximum number of bases < QThreshold allowed per Kmer.
+# If a kmer contains <= MaxBadQPerKmer bases having quality < QThreshold,
+# it is considered as high quality kmer;
+# default = 0;
+MaxBadQPerKmer	6
+
+# below which it is considered as low probability base call (ASCII value)
+Qlb			 	45
+
+# If a tile kmer with good quality count > T_expGoodCnt, it is considered as error free without further validation
+# This parameter is determined by kmer histogram, this value is typically set > first peak in the histogram 
+# Theoretically, if we assume random genome sampling and uniform distribution of errors (with error rate p_e)
+# then this value would be
+# [read_number/(genome_len - read_len + 1) * (read_length - Tile_len + 1)] * (1-p_e)^{L}
+T_expGoodCnt	20
+
+# Cardinality of minimum evidence of a Good Tile.
+# To be used to count for low coverage regions, when a tile is good but is of low cadinality 
+# This parameter is determined by kmer histogram, typically set to be >= first local minimum 
+# in the histogram but can be arbitrarily chosen. If this value is set to be high, then Reptile
+# will do a very good job reducing FPs, but will increase FNs in the meantime. 
+# T_card < T_expGoodCnt
+# Suggestions, for the dataset with unknown reference, modifying this value so that the size of the
+# output file is maximized. Because Reptile took a very conservative for correcting errors, therefore,
+# by seeing the size of output file increases while changing this value, a signficant amount of 
+# additional errors are detected while the number of FPs increases slowly
+T_card			8
+
+

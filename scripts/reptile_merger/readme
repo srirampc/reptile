@@ -1,0 +1,27 @@
+
+This folder contains source files for reptile_merger program.
+
+Input:
+  1) Fasta format file before Reptile correction
+  2) Reptile output 
+
+Output:
+A file (the file name is specified by the user) in Fasta format 
+after merging 1) and 2) 
+
+To compile:
+
+> make all
+
+To clean up:
+
+> make clean
+
+To see how to use the program:
+
+> ./reptile_merger
+
+Example command to run the program: 
+
+> ./reptile_merger input.fa reptile_correction output.fa
+

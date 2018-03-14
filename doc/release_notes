@@ -1,0 +1,22 @@
+
+The following has been changed in version 1.1
+
+-- More efficient way to record kmer and tiles compared to version 1.0
+   Effectively, the total run time has been halved (as tested) 
+
+-- In Parser.cpp file, the following part of code has been changed
+	version 1.0 
+        int idx = bisearch(snKArray_, snKArray_.size(), nbIDs[i]);
+        if (idx != -1){
+            if(snKArray_[idx].goodCnt >= myPara.tCard) {
+                myNB.push_back(snKArray_[idx]);
+            }
+        }
+	version 1.1
+		if (std::binary_search(kArray_.begin(), kArray_.end(), nbIDs[i])){
+            myNB.push_back(nbIDs[i]);
+        }
+   
+-- A stand-alone script called reptile_merger is provided to generate the fasta format
+   output after Reptile correction. See readme file in reptile_merger for more information
+
