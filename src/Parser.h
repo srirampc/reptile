@@ -28,7 +28,6 @@
 #define	_PARSER_H
 
 #include "util.h"
-#include "fasta_file.hpp"
 #include "Kmer.h"
 #include "Seq.h"
 
@@ -61,7 +60,6 @@ public:
     void reLoad(const Para& myPara);
     void tableMaker(const Para& myPara);
     void ec(const Para& myPara);
-    void output (const std::string& filename);
 private:
     uvec_t kArray_;     //simple unique kmers
     kcvec_t tileArray_; // <tile, good_cnt, cnt>
@@ -74,6 +72,7 @@ private:
     int readID_;
     evec_t readErr_;    
 
+    void output (Seq& mySeq, std::ostream& outfp);
     void readEC(char* addr, char* qAddr, const Para& myPara);
     bool errorCall(const upair_t& mosaic, const ipair_t& dPoints,
                 const ipair_t& hdUb, char* qAddr, const Para& myPara);

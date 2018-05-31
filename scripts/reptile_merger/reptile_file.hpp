@@ -38,8 +38,8 @@ namespace mlr {
       }
 
       // Method to get corrections for a particular read
-      int64_t get_corrections(std::vector<fix_t>& fixes) {
-         int64_t rc = -1;
+      std::string get_corrections(std::vector<fix_t>& fixes) {
+         std::string rc = "";
          fix_t fix;
          int32_t i = 0;
 
@@ -52,7 +52,7 @@ namespace mlr {
             assert(in_.gcount()+1 < (int64_t)sizeof(buffer_));
 
             // Get the read number
-            rc = (int64_t)atof(strtok(buffer_, "\t"));
+            rc = strtok(buffer_, "\t");
 
             // Get the correction count
             const int64_t count = (int64_t)atof(strtok(NULL, "\t"));

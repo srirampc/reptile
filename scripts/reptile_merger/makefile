@@ -3,7 +3,7 @@
 SRCDIR = .
 CXX = g++
 CXXFLAGS = -Wall -I$(SRCDIR)
-LIBS = 
+LIBS = -lz
 
 .PHONY: all
 all : reptile_merger

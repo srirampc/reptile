@@ -32,6 +32,10 @@
 #include "util.h"
 #include "fasta_file.hpp"
 
+#include <zlib.h>
+#include "kseq.h"
+KSEQ_INIT(gzFile, gzread)
+
 class Seq {
 
 protected:
@@ -40,14 +44,21 @@ protected:
     cvec_t Q_;              // quality string
     ivec_t QL_;
     strvec_t headers_;  
-public:
-    Seq();
-    Seq(const Seq& orig);
-    virtual ~Seq();
-    //void retrieve_seqs_from_fa(const std::string& filename, bool flag);
 
-    void retrieve_seqs_from_fa(bIO::FASTA_input& handle, int max, bool flag);
+	gzFile srfp_;
+	kseq_t *srfseq_;
+    bIO::FASTA_input *fasta_sr, *fasta_q;
+    bool qflag_;
+
+    int retrieve_batch_fa(int max);
+    int retrieve_batch_fa(bIO::FASTA_input& handle, int max, bool flag);
+    int retrieve_batch_fastq(int max);
     
+public:
+    Seq(const std::string& srfname, const std::string& qfname);
+    virtual ~Seq();
+    
+    int retrieve_batch(int max);
     void qualHist(const Para& myPara);
     const cvec_t& getS () const {
         return S_;

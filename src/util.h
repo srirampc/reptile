@@ -147,6 +147,12 @@ private:
             std::cout << "Err: Output file is not specified!\n";
             exit (1);
         }
+        std::ofstream oHandle(oErrName.c_str());
+        if (!oHandle.good()) {
+            std::cout << "open " << oErrName << " failed, correct path?\n";
+            exit(1);
+        }
+        oHandle.close();
         std::cout << "O/ErrFile = " << oErrName << "\n";
         std::cout << "(K, step, tile) = " << "(" << K << "," << step << "," << K + step << ")\n"
                   << "BatchSize = " << batchSize << "\n"

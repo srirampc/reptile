@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
     
     myParser.ec(myPara);
     
-    myParser.output(myPara.oErrName);
+    //myParser.output(myPara.oErrName);
 
     print_time("Program Finished Successfully!!\n", timing);
     

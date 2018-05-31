@@ -29,6 +29,11 @@
 
 #include "Parser.h"
 
+bool file_exists(const char *fileName) {
+    std::ifstream infile(fileName);
+    return infile.good();
+}
+
 /*
  * Merge all kmers in mySeq to TargetArray, which stores unique kmers
  */
@@ -99,10 +104,7 @@ void mergeKInfo(kcvec_t& TargetArray, const kcvec_t& sourceArray){
  */
 void Parser::load(const Para& myPara) {
 
-    bIO::FASTA_input fasta_sr(myPara.iFaName);
-    bIO::FASTA_input fasta_q(myPara.iQName);
-
-    if (fasta_sr.operator bool() == false) {
+    if (!file_exists(myPara.iFaName.c_str())) {
         std::cout << "open " << myPara.iFaName << "failed, does it exist? \n";
         exit(1);
     }
@@ -111,17 +113,16 @@ void Parser::load(const Para& myPara) {
             << " K) \n\t Batch:";
     int batch = 0;
     double timing = get_time();
-    while (fasta_sr.operator bool()) {
+    int fetchRetCode = 0;
+
+    Seq mySeq(myPara.iFaName, myPara.iQName);
+
+    while (fetchRetCode >= 0) {
 
         std::cout << batch << "\t";
         batch++;
 
-        Seq mySeq;
-  
-        mySeq.retrieve_seqs_from_fa(fasta_sr, myPara.batchSize, false);
-        if (myPara.QFlag) {
-            mySeq.retrieve_seqs_from_fa(fasta_q, myPara.batchSize, true);
-        }
+        fetchRetCode = mySeq.retrieve_batch(myPara.batchSize);
 
         // kmer
         mergeK(kArray_, mySeq, myPara.K);
@@ -130,6 +131,7 @@ void Parser::load(const Para& myPara) {
         tmpTileArray.getKC(mySeq, myPara.step+myPara.K, myPara);
         mergeKInfo(tileArray_, tmpTileArray.getElem());
         
+        mySeq.clear();
         print_time("", timing);
         
     }
@@ -235,27 +237,24 @@ void Parser::ec(const Para& myPara) {
     std::cout << "Start Error Correction in batches...(batch size: "
             << (double) myPara.batchSize / 1000 << " K) \n\t Batch:";
 
-    bIO::FASTA_input fasta_sr(myPara.iFaName);
-    bIO::FASTA_input fasta_q(myPara.iQName);
-
-    if (fasta_sr.operator bool() == false) {
+    if (file_exists(myPara.iFaName.c_str()) == false) {
         std::cout << "open " << myPara.iFaName << "failed :|\n";
         exit(1);
     }
 
     int batch = 0;
     double timing = get_time();
+    int fetchRetCode = 0;
 
-    while (fasta_sr.operator bool()) {
+    std::ofstream oHandle(myPara.oErrName.c_str());
+    Seq mySeq(myPara.iFaName, myPara.iQName);
+
+    while (fetchRetCode >= 0) {
 
         std::cout << batch << "\t";
         batch++;
 
-        Seq mySeq;
-        mySeq.retrieve_seqs_from_fa(fasta_sr, myPara.batchSize, false);
-        if (myPara.QFlag) {
-            mySeq.retrieve_seqs_from_fa(fasta_q, myPara.batchSize, true);
-        }
+        fetchRetCode = mySeq.retrieve_batch(myPara.batchSize);
 
         //---------------------------------------------------------------------
         // now start correcting this batch -- could be multi-threaded
@@ -264,18 +263,21 @@ void Parser::ec(const Para& myPara) {
 
         for (int i = 0; i < numSeq; ++i) {
             int pos = mySeq.getSL()[i];
+            readID_ = i; //
             char* addr = const_cast<char*> (&mySeq.getS()[pos]);
             char* qAddr = NULL;
             if (myPara.QFlag) {
                 qAddr = const_cast<char*> (&mySeq.getQ()[pos]);
             }
             readEC(addr, qAddr, myPara);
-            readID_++;
+            // readID_++;
         }// for
         //---------------------------------------------------------------------                
+        output(mySeq, oHandle);
         print_time("", timing);
     }//while (fasta_sr.operator bool())
 
+    oHandle.close();
     std::cout << "\tdone !\n\n";
 }
 
@@ -752,7 +754,7 @@ bool Parser::overlay(uint64_t& rslt, uint32_t n1, uint32_t n2, const Para& myPar
     return false;
 }
 
-void Parser::output(const std::string& filename) {
+void Parser::output(Seq& mySeq, std::ostream& oHandle) {
 
     /*
      * Resulting file format:
@@ -760,15 +762,9 @@ void Parser::output(const std::string& filename) {
      * from: reference; to: read (numercial value Aa:0 Cc:1 Gg:2 Tt:3 others 4)
      * qual: quality (numerical value)
      */
-    std::ofstream oHandle(filename.c_str());
-    if (!oHandle.good()) {
-        std::cout << "open " << filename << " failed, correct path?\n";
-        exit(1);
-    }
-
     for (int i = 0; i < records_.size(); ++i) {
 
-        oHandle << records_[i].readID << "\t" << records_[i].evec.size();
+        oHandle << mySeq.getHeaders()[records_[i].readID] << "\t" << records_[i].evec.size();
 
         for (int j = 0; j < records_[i].evec.size(); ++j) {
             oHandle << "\t" << records_[i].evec[j].pos << "\t"
@@ -777,6 +773,6 @@ void Parser::output(const std::string& filename) {
         }
         oHandle << "\n";
     }
-    oHandle.close();
+    records_.clear();
 }
 
