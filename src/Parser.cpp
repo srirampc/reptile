@@ -247,7 +247,7 @@ void Parser::ec(const Para& myPara) {
     int fetchRetCode = 0;
 
     std::ofstream *pHandle = 0;
-    if(myPara.oErrName == "-")
+    if(myPara.oErrName != "-")
         pHandle = new std::ofstream(myPara.oErrName.c_str());
     Seq mySeq(myPara.iFaName, myPara.iQName);
 
