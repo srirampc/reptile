@@ -88,11 +88,11 @@ private:
 
     void setPara() {
 
-        if (argnum != 2) { std::cout << "Specify Config file \n"; exit(1); }
+        if (argnum != 2) { std::cerr << "Specify Config file \n"; exit(1); }
 
         std::string line, s1;
         std::ifstream input(arg[1]);
-        if (!input) { std::cout << "cant open " << arg[1] << "\n"; exit(1);}
+        if (!input) { std::cerr << "cant open " << arg[1] << "\n"; exit(1);}
 
         std::istringstream buf;
 
@@ -134,27 +134,27 @@ private:
             }
         }
         if (iFaName.empty()) {
-            std::cout << "Err: InFaFile is not specified!\n";
+            std::cerr << "Err: InFaFile is not specified!\n";
             exit (1);
         }
-        std::cout << "Input Parameters:\n----------------------------------\n";
-        std::cout << "Short Reads file: " << iFaName << "\n";
+        std::cerr << "Input Parameters:\n----------------------------------\n";
+        std::cerr << "Short Reads file: " << iFaName << "\n";
         if (QFlag){
-            std::cout << "I/QualFile = " << iQName << "\n"
+            std::cerr << "I/QualFile = " << iQName << "\n"
                       << "Qthreshold = " << qualThreshold << "\n";
         }
         if (oErrName.empty()) {
-            std::cout << "Err: Output file is not specified!\n";
+            std::cerr << "Err: Output file is not specified!\n";
             exit (1);
         }
         std::ofstream oHandle(oErrName.c_str());
         if (!oHandle.good()) {
-            std::cout << "open " << oErrName << " failed, correct path?\n";
+            std::cerr << "open " << oErrName << " failed, correct path?\n";
             exit(1);
         }
         oHandle.close();
-        std::cout << "O/ErrFile = " << oErrName << "\n";
-        std::cout << "(K, step, tile) = " << "(" << K << "," << step << "," << K + step << ")\n"
+        std::cerr << "O/ErrFile = " << oErrName << "\n";
+        std::cerr << "(K, step, tile) = " << "(" << K << "," << step << "," << K + step << ")\n"
                   << "BatchSize = " << batchSize << "\n"
                   << "Max Hamming Distance Allowed = " << hdMax << "\n"
                   << "ExpectSearch = " << eSearch << "\n"
@@ -164,10 +164,10 @@ private:
                   << "Qlb = " << Qlb << "\n"
                   << "T_expGoodCnt = " << tGoodTile << "\n"
                   << "T_card = " << tCard << "\n";
-        std::cout << "----------------------------------\n";
+        std::cerr << "----------------------------------\n";
 
         if (K > 16 || (K + step) > 32) {
-            std::cout << "Set K in the range of (0, 16] and K+step in the range of (2, 32]\n";
+            std::cerr << "Set K in the range of (0, 16] and K+step in the range of (2, 32]\n";
             exit(1);
         }
     }
@@ -202,7 +202,7 @@ inline int char_to_bits(char c) {
         return cvalue;
     } else {
         if(flag == false){
-                std::cout << "Note: non-ACGT character found: " << c
+                std::cerr << "Note: non-ACGT character found: " << c
                           << " , all will be ignored\n";
                 flag = true;
         }
@@ -228,9 +228,9 @@ inline char bits_to_char(int value) {
 /*
  *  reverse_complementary test code:
  *  uint32_t test = 314324;
- *  std::cout << toString(test, 10) << "\n";
+ *  std::cerr << toString(test, 10) << "\n";
  *  uint32_t result = reverse_complementary<uint32_t, uint32_t> (test, 10);
- *  std::cout << toString(result, 10) << "\n";
+ *  std::cerr << toString(result, 10) << "\n";
  *
 */
 template <typename Tin, typename Tout>
@@ -300,7 +300,7 @@ inline double get_time() {
 
 inline void print_time (const std::string& msg, double& timing){
     double cur_time = get_time();
-    std::cout << msg << "(" << cur_time - timing << " secs)\n\n";
+    std::cerr << msg << "(" << cur_time - timing << " secs)\n\n";
     timing = cur_time;
 }
 

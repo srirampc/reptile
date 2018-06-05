@@ -108,13 +108,13 @@ struct TComp {
  */
 inline void print_kcvec (const std::string& msg, const kcvec_t& myvec, int len){
 
-    std::cout << msg << "\n";
-    std::cout << "\n--------------------------------\n";
+    std::cerr << msg << "\n";
+    std::cerr << "\n--------------------------------\n";
     for (int j = 0; j < myvec.size(); ++ j){
-        std::cout << toString(myvec[j].ID, len)
+        std::cerr << toString(myvec[j].ID, len)
         << "\t" << myvec[j].goodCnt << "\t" << myvec[j].cnt << "\n";
     }
-    std::cout << "--------------------------------\n";
+    std::cerr << "--------------------------------\n";
 }
 
 #endif	/* _PARSER_H */

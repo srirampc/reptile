@@ -105,11 +105,11 @@ void mergeKInfo(kcvec_t& TargetArray, const kcvec_t& sourceArray){
 void Parser::load(const Para& myPara) {
 
     if (!file_exists(myPara.iFaName.c_str())) {
-        std::cout << "open " << myPara.iFaName << "failed, does it exist? \n";
+        std::cerr << "open " << myPara.iFaName << "failed, does it exist? \n";
         exit(1);
     }
 
-    std::cout << "Loading reads (batch size: " << (double) myPara.batchSize / 1000
+    std::cerr << "Loading reads (batch size: " << (double) myPara.batchSize / 1000
             << " K) \n\t Batch:";
     int batch = 0;
     double timing = get_time();
@@ -119,7 +119,7 @@ void Parser::load(const Para& myPara) {
 
     while (fetchRetCode >= 0) {
 
-        std::cout << batch << "\t";
+        std::cerr << batch << "\t";
         batch++;
 
         fetchRetCode = mySeq.retrieve_batch(myPara.batchSize);
@@ -136,7 +136,7 @@ void Parser::load(const Para& myPara) {
         
     }
 
-    std::cout << "Loading done! Approximately "
+    std::cerr << "Loading done! Approximately "
             << (double) batch * myPara.batchSize / 1000000 << " Million Reads. \n\n";
 
 }
@@ -158,16 +158,16 @@ int bisearch(const kcvec_t& KArray, int size, uint64_t elem) {
 
 
 void print(int i) {
-    std::cout << " " << i;
+    std::cerr << " " << i;
 }
 
 void printHex(int i) {
-    std::cout << " " << std::hex << i;
+    std::cerr << " " << std::hex << i;
 }
 
 void Parser::tableMaker(const Para& myPara) {
 
-    std::cout << "Constructing Facility Tables ... \n";
+    std::cerr << "Constructing Facility Tables ... \n";
     /*
      * 1. split K positions into random chunks based
      *    on myPara.k and myPara.eSearch
@@ -175,7 +175,7 @@ void Parser::tableMaker(const Para& myPara) {
     ivec_t indices(myPara.K, 0);
     for (int i = 0; i < myPara.K; ++i) indices[i] = i;
     std::random_shuffle(indices.begin(), indices.end());
-    //std::for_each(indices.begin(), indices.end(), print);  std::cout <<"\n";
+    //std::for_each(indices.begin(), indices.end(), print);  std::cerr <<"\n";
 
     int unitSize = (log2(myPara.eSearch) / 2);
     int num = myPara.K / unitSize;
@@ -196,7 +196,7 @@ void Parser::tableMaker(const Para& myPara) {
         num++;
     }
 
-    //std::cout << "\t" << num << " Tables to be created\n";
+    //std::cerr << "\t" << num << " Tables to be created\n";
 
     /*
      * 2. Create Masks for tables
@@ -211,7 +211,7 @@ void Parser::tableMaker(const Para& myPara) {
     }
 
     //std::for_each(masks_.begin(), masks_.end(), printHex);
-    //std::cout << "\n";
+    //std::cerr << "\n";
 
     /*
      * 3. Create Tables Then sort according to masks for each table
@@ -228,17 +228,17 @@ void Parser::tableMaker(const Para& myPara) {
                 table_.begin() + (i + 1) * tableSize, TComp(masks_[i]));
     }
 
-    std::cout << "\tdone !\n\n";
+    std::cerr << "\tdone !\n\n";
 
 }
 
 void Parser::ec(const Para& myPara) {
 
-    std::cout << "Start Error Correction in batches...(batch size: "
+    std::cerr << "Start Error Correction in batches...(batch size: "
             << (double) myPara.batchSize / 1000 << " K) \n\t Batch:";
 
     if (file_exists(myPara.iFaName.c_str()) == false) {
-        std::cout << "open " << myPara.iFaName << "failed :|\n";
+        std::cerr << "open " << myPara.iFaName << "failed :|\n";
         exit(1);
     }
 
@@ -246,12 +246,14 @@ void Parser::ec(const Para& myPara) {
     double timing = get_time();
     int fetchRetCode = 0;
 
-    std::ofstream oHandle(myPara.oErrName.c_str());
+    std::ofstream *pHandle = 0;
+    if(myPara.oErrName == "-")
+        pHandle = new std::ofstream(myPara.oErrName.c_str());
     Seq mySeq(myPara.iFaName, myPara.iQName);
 
     while (fetchRetCode >= 0) {
 
-        std::cout << batch << "\t";
+        std::cerr << batch << "\t";
         batch++;
 
         fetchRetCode = mySeq.retrieve_batch(myPara.batchSize);
@@ -273,12 +275,15 @@ void Parser::ec(const Para& myPara) {
             // readID_++;
         }// for
         //---------------------------------------------------------------------                
-        output(mySeq, oHandle);
+        output(mySeq, (pHandle == 0) ? std::cout : *pHandle);
         print_time("", timing);
     }//while (fasta_sr.operator bool())
 
-    oHandle.close();
-    std::cout << "\tdone !\n\n";
+    if(pHandle != 0){
+        pHandle->close();
+        delete pHandle;
+    }
+    std::cerr << "\tdone !\n\n";
 }
 
 void Parser::readEC(char* addr, char* qAddr, const Para& myPara) {
@@ -715,7 +720,7 @@ void Parser::tiling(kcvec_t& tiles, const uvec_t& N1,
     if (N1.size() == 0 || N2.size() == 0) return;
     uint64_t reptile;
     if (!overlay(reptile, N1[0], N2[0], myPara)) {
-        std::cout << "Err: errCall, reptile construction fail\n";
+        std::cerr << "Err: errCall, reptile construction fail\n";
         exit(1);
     }
     int idx = bisearch(tileArray_, tileArray_.size(), reptile);

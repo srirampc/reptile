@@ -80,7 +80,7 @@ void Kmer::getKC(const Seq& mySeq, int kvalue, const Para& myPara) {
         }
     }
 
-    //std::cout << "\tsorting ...\n";
+    //std::cerr << "\tsorting ...\n";
     std::sort(KQ_array.begin(), KQ_array.end(), KQcomp());
 
     // linear scan to remove the duplicates and calculating multiplicity
